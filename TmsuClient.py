@@ -17,7 +17,7 @@ class client:
 
     def tag(self, filename, tag, value=None, taglist={}):
         taglist[tag]=value
-        tags = [ str(key) if value is None else "%s=%s"%(key,value) for key,value in taglist.iteritems() ]
+        tags = [ key if value is None else "%s=%s"%(key,value) for key,value in taglist.iteritems() ]
         try:
             result = subprocess.check_output(['tmsu', 'tag', filename] + tags , cwd=self.path_, stderr=subprocess.STDOUT).strip()
         except subprocess.CalledProcessError as e:

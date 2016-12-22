@@ -88,14 +88,23 @@ class Ressource:
                 for c in subel.getchildren():
                     if c.tag=="Body":
                         self.data_ = c.text
+#                        if self.data_ is None: print etree.tostring(subel)
             if subel.tag=="Mime": self.mime_ = subel.text
             if subel.tag=="ResourceAttributes":
                 for c in subel.getchildren():
                     if c.tag=="FileName" : self.filename_ = c.text
         # sanity checks
+        #TODO there seems to be a bug in cases where the data cannot be read.
+#            print etree.tostring(element)
+#            print self.__dict__
+#            for subel in element:
+#                print "-",subel.tag, subel.text
+#                if subel.tag=="Data":
+#                    for c in subel.getchildren():
+#                        print "*",c.tag, c.text
         assert(self.guid_ is not None)
         assert(self.noteGuid_ is not None)
-        assert(self.data_ is not None)
+#        assert(self.data_ is not None)
         assert(self.mime_ is not None or self.filename_ is not None)
         # add missing filename if needed
         if self.filename_ is None:
@@ -103,11 +112,16 @@ class Ressource:
             if extension is None: extension = ".bin"
             self.filename_ = self.guid_ + extension
         # work on the data part
-        self.data_ = binascii.unhexlify(self.data_)
+        try:
+            self.data_ = binascii.unhexlify(self.data_)
+        except:
+            print "WARNING: cannot restore ",self.filename_
+            self.data_ = ""
 
 class Parser:
-    def __init__(self, inputfile):
+    def __init__(self, inputfile, verbose=True):
         self.inputfile_ = inputfile
+        self.verbose_ = verbose
         
     def getNotebooks(self):
         output = {}

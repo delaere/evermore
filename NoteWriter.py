@@ -23,12 +23,13 @@ def filename(name):
         return name
 
 class Writer:
-    def __init__(self,notebooks,output):
+    def __init__(self,notebooks,output,verbose=True):
         self.notebooks_ = notebooks
         self.output_ = os.path.abspath(output)
         self.tmsu_ = TmsuClient.client(self.output_)
         self.countNotes_ = 0
         self.countFiles_ = 0
+        self.verbose_ = verbose
 
     def createDirectories(self):
         # here we must check that it doesn't exist, create output and a dir for each workbook, and finally run tmsu init
@@ -39,7 +40,7 @@ class Writer:
             raise RuntimeError("%s exists!"%self.output_)
         # loop over notebooks and create directories
         for guid,name in self.notebooks_.iteritems():
-            os.makedirs(os.path.join(self.output_,''.join(e for e in name if e.isalnum())))
+            os.makedirs(os.path.join(self.output_,''.join(e for e in name if e.isalnum() or e.isspace())))
         # init the db
         self.tmsu_.init()
 
@@ -51,7 +52,7 @@ class Writer:
         noteFilename = filename(os.path.join(path,''.join(e for e in note.title_ if e.isalnum() or e.isspace()))+".md")
         # convert note to markdown and write to noteFilename
         content = html2md(note.title_,note.content_)
-        print "Writing",noteFilename
+        if self.verbose_: print "Writing",noteFilename
         with open(noteFilename, 'wb') as output_file:
             output_file.write(content.encode(encoding='utf-8'))
         self.countFiles_ += 1
@@ -63,7 +64,7 @@ class Writer:
         # now tackle ressources
         for ressource in note.ressources_:
             ressourceFilename = filename(os.path.join(path,ressource.filename_))
-            print "Writing",ressourceFilename
+            if self.verbose_: print "Writing",ressourceFilename
             with open(ressourceFilename,"wb") as fout: fout.write(ressource.data_)
             # tag ressourceFilename
             for _,tag in note.tags_.iteritems():
