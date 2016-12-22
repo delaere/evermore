@@ -59,7 +59,6 @@ class MyOptionParser:
         # check that output directory does not exist (except if an option allows it)
         return opts
 
-#TODO debug: tags seem random???
 if __name__ == "__main__":
     # get the options
     opts = MyOptionParser().get_opt()
