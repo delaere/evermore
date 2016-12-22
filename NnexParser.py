@@ -28,7 +28,7 @@ class Note:
         self.title_ = None
         self.content_ = None
         self.created_ = None
-        self.Updated_ = None
+        self.updated_ = None
         self.notebookGuid_ = None
         self.ressources_ = []
         self.tags_ = {}
