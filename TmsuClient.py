@@ -15,11 +15,13 @@ class client:
             print "Impossible to initialize TMSU in",self.path_
             raise
 
-    def tag(self, filename, tag, value=None, taglist={}):
-        taglist[tag]=value
-        tags = [ key if value is None else "%s=%s"%(key,value) for key,value in taglist.iteritems() ]
+    def tag(self, filename, tag, value=None):
+        if value is None:
+            tags = tag
+        else:
+            tags = "%s=%s"%(key,value)
         try:
-            result = subprocess.check_output(['tmsu', 'tag', filename] + tags , cwd=self.path_, stderr=subprocess.STDOUT).strip()
+            result = subprocess.check_output(['tmsu', 'tag', filename,tags] , cwd=self.path_, stderr=subprocess.STDOUT).strip()
         except subprocess.CalledProcessError as e:
             print "Error while tagging ", filename
             raise
