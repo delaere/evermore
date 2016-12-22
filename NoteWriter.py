@@ -66,6 +66,8 @@ class Writer:
             ressourceFilename = filename(os.path.join(path,ressource.filename_))
             if self.verbose_: print "Writing",ressourceFilename
             with open(ressourceFilename,"wb") as fout: fout.write(ressource.data_)
+            # set the access and modified times of the file specified by path.
+            os.utime(ressourceFilename,(int(note.updated_)/1000,int(note.updated_)/1000))
             # tag ressourceFilename
             for _,tag in note.tags_.iteritems():
                 self.tmsu_.tag(ressourceFilename,tag)
