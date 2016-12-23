@@ -1,3 +1,4 @@
+import os
 import binascii
 import mimetypes
 from lxml import etree
@@ -32,6 +33,7 @@ class Note:
         self.notebookGuid_ = None
         self.ressources_ = []
         self.tags_ = {}
+        self.valid_ = False
         # read the note
         for subel in element:
             if subel.tag=="Guid": self.guid_ = subel.text
@@ -48,12 +50,7 @@ class Note:
             if subel.tag=="NoteResource" :
                 self.ressources_.append(Ressource(subel))
         # sanity checks
-        assert(self.guid_ is not None)
-        assert(self.title_ is not None)
-        assert(self.content_ is not None)
-        assert(self.created_ is not None)
-        assert(self.updated_ is not None)
-        assert(self.notebookGuid_ is not None)
+        self.valid_ = (None not in [self.guid_,self.title_,self.content_,self.created_,self.updated_,self.notebookGuid_])
 
 class Ressource:
     def __init__(self,element):
@@ -80,6 +77,7 @@ class Ressource:
         self.data_ = None
         self.mime_ = None
         self.filename_ = None
+        self.valid_ = False
         # read the ressource
         for subel in element:
             if subel.tag=="Guid": self.guid_ = subel.text
@@ -87,41 +85,25 @@ class Ressource:
             if subel.tag=="Data": 
                 for c in subel.getchildren():
                     if c.tag=="Body":
-                        self.data_ = c.text
-#                        if self.data_ is None: print etree.tostring(subel)
+                        self.data_ = binascii.unhexlify(c.text) if c.text is not None else None
             if subel.tag=="Mime": self.mime_ = subel.text
             if subel.tag=="ResourceAttributes":
                 for c in subel.getchildren():
                     if c.tag=="FileName" : self.filename_ = c.text
-        # sanity checks
-        #TODO there seems to be a bug in cases where the data cannot be read.
-#            print etree.tostring(element)
-#            print self.__dict__
-#            for subel in element:
-#                print "-",subel.tag, subel.text
-#                if subel.tag=="Data":
-#                    for c in subel.getchildren():
-#                        print "*",c.tag, c.text
-        assert(self.guid_ is not None)
-        assert(self.noteGuid_ is not None)
-#        assert(self.data_ is not None)
-        assert(self.mime_ is not None or self.filename_ is not None)
         # add missing filename if needed
         if self.filename_ is None:
-            extension = mimetypes.guess_extension(self.mime_, False)
+            extension = mimetypes.guess_extension(self.mime_, False) if self.mime_ is not None else None
             if extension is None: extension = ".bin"
-            self.filename_ = self.guid_ + extension
-        # work on the data part
-        try:
-            self.data_ = binascii.unhexlify(self.data_)
-        except:
-            print "WARNING: cannot restore ",self.filename_
-            self.data_ = ""
+            self.filename_ = self.guid_ + extension if self.guid_ is not None else None
+        # sanity checks
+        self.valid_ = (None not in [self.guid_,self.noteGuid_,self.data_,self.filename_])
 
 class Parser:
     def __init__(self, inputfile, verbose=True):
         self.inputfile_ = inputfile
         self.verbose_ = verbose
+        self.fileSize_ = os.path.getsize(self.inputfile_)
+        self.position_ = 0
         
     def getNotebooks(self):
         output = {}
@@ -154,8 +136,13 @@ class Parser:
         return output
 
     def getNotes(self):
-        context = etree.iterparse(self.inputfile_,events=('end',), tag='Note',huge_tree=True)
-        for event, element in context:
-            yield Note(element)
-            element.clear()
+        with open(self.inputfile_, 'r') as f:
+            context = etree.iterparse(f,events=('end',), tag='Note',huge_tree=True)
+            for event, element in context:
+                self.position_ = float(f.tell())
+                yield Note(element)
+                element.clear()
+
+    def progress(self):
+        return self.position_/self.fileSize_
 

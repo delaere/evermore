@@ -19,7 +19,7 @@ class client:
         if value is None:
             tags = tag
         else:
-            tags = "%s=%s"%(key,value)
+            tags = "%s=%s"%(tag,value)
         try:
             result = subprocess.check_output(['tmsu', 'tag', filename,tags] , cwd=self.path_, stderr=subprocess.STDOUT).strip()
         except subprocess.CalledProcessError as e:

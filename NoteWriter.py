@@ -45,12 +45,18 @@ class Writer:
         self.tmsu_.init()
 
     def write(self,note):
+        # check that the note is valid. Skip otherwise.
+        if not note.valid_:
+            if self.verbose_: print "Skipping Invalid note", note.guid_, note.title_
+            return
         # get the directory where to write the note.
         notebook = self.notebooks_[note.notebookGuid_]
         path = os.path.join(self.output_,''.join(e for e in notebook if e.isalnum() or e.isspace()))
         # filename for the note
         noteFilename = filename(os.path.join(path,''.join(e for e in note.title_ if e.isalnum() or e.isspace()))+".md")
         # convert note to markdown and write to noteFilename
+        #TODO in html2md, detect empty notes (with just an attachment) and return None. In that case skip note creation (but go on with ressources).
+        #TODO could also have an option to create a pdf of the html, instead of a md.
         content = html2md(note.title_,note.content_)
         if self.verbose_: print "Writing",noteFilename
         with open(noteFilename, 'wb') as output_file:
@@ -63,6 +69,11 @@ class Writer:
             self.tmsu_.tag(noteFilename,tag)
         # now tackle ressources
         for ressource in note.ressources_:
+            # check that the ressource is valid. Skip otherwise.
+            if not ressource.valid_:
+                if self.verbose_: print "Skipping Invalid ressource", ressource.guid_, ressource.filename_
+                continue
+            # get filename and write
             ressourceFilename = filename(os.path.join(path,ressource.filename_))
             if self.verbose_: print "Writing",ressourceFilename
             with open(ressourceFilename,"wb") as fout: fout.write(ressource.data_)
@@ -76,7 +87,10 @@ class Writer:
         self.countNotes_ += 1
 
     def printReport(self):
-        pprint.pprint(self.tmsu_.info())
+        info = self.tmsu_.info()
+        print "Database:",info["database"]
+        print "Path:",info["path"]
+        print "Size:",info["size"]
         print "Number of Notes processed:", self.countNotes_
         print "Number of Files created:", self.countFiles_
         print "Number of Files tagged:", len(self.tmsu_.files())

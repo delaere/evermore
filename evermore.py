@@ -2,6 +2,7 @@ from optparse import OptionParser
 import os
 import NnexParser 
 import NoteWriter
+from Progress import progress
 
 def importdata(inputfile, output, options):
     verbose = options["verbose"]
@@ -9,26 +10,27 @@ def importdata(inputfile, output, options):
     parser = NnexParser.Parser(inputfile,verbose)
     # read notebooks and create corresponding directories
     notebooks = parser.getNotebooks()
-    if verbose: print "Found",len(notebooks),"notebooks."
+    print "Found",len(notebooks),"notebooks."
     writer = NoteWriter.Writer(notebooks,output,verbose)
     if not options["dryrun"]: writer.createDirectories()
-    # read tags
-    tags = parser.getTags()
-    if verbose: print "Found",len(tags),"tags."
     # read notes
     if options["dryrun"]:
         count = 0
         for note in parser.getNotes():
-            if verbose: print note.title_
+            if verbose:
+                print note.title_,"({0:.1f}%)".format(parser.progress()*100)
             count += 1
         if verbose: print "Found %d notes"%count
     else:
         for note in parser.getNotes():
             writer.write(note)
-    # final printout; should be controled by an option flag (verbosity)
-    print "Import completed."
+            if verbose: 
+                print note.title_,"({0:.1f}%)".format(parser.progress()*100)
+            else:
+                progress(parser.position_, parser.fileSize_, status='Importing notes')
+    # final printout
+    print "\nImport completed."
     if not options["dryrun"]: writer.printReport()
-
 
 class MyOptionParser: 
     def __init__(self):
@@ -54,9 +56,9 @@ class MyOptionParser:
         # check that inputfile exists
         if not os.path.isfile(opts.sourcefile):
             self.parser.error("%s: no such file."%opts.sourcefile)
+        # check that output directory does not exist (except if an option allows it)
         if os.path.exists(opts.destination):
             self.parser.error("%s: destination already exists."%opts.destination)
-        # check that output directory does not exist (except if an option allows it)
         return opts
 
 if __name__ == "__main__":
