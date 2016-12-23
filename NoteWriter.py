@@ -1,5 +1,4 @@
 import TmsuClient
-import pprint
 import os
 from html2text import HTML2Text
 
