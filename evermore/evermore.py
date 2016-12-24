@@ -61,8 +61,11 @@ class MyOptionParser:
             self.parser.error("%s: destination already exists."%opts.destination)
         return opts
 
-if __name__ == "__main__":
+def main():
     # get the options
     opts = MyOptionParser().get_opt()
     importdata(opts.sourcefile, opts.destination, opts.__dict__)
+
+if __name__ == "__main__":
+    main()
 
