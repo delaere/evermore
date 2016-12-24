@@ -4,11 +4,13 @@ from setuptools import setup, find_packages
 setup(
     name="evermore",
     version="1.0.0",
-    description="A tool to export data from Evernote to a directory structure indexed with TMSU",
+    description="A tool to export data from Evernote to a semantic filesystem",
     long_description="""
-A tool to export data from Evernote (more precisely NixNote) to a directory structure indexed with TMSU.
+A tool to export data from Evernote (more precisely NixNote) 
+to a directory structure indexed with TMSU.
 
-Notes are converted to markdown and attachments are saved. Every file is indexed with the tags from the related note.
+Notes are converted to markdown and attachments are saved. 
+Every file is indexed with the tags from the related note.
 
 ~~~~
 Usage: evermore.py [options] source.nnex destdir
