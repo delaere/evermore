@@ -10,11 +10,13 @@ Version: %{version}
 Release: %{release}
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: GPLv3
-Group: Development/Libraries
+Group: Applications/Productivity
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Christophe Delaere <christophe.delaere@gmail.com>
+Provides: evermore = 1.0.0
+Requires: TMSU python2-lxml python-html2text
 Url: https://github.com/delaere/evermore
 
 %description
@@ -48,4 +50,9 @@ python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUIL
 rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
+
 %defattr(-,root,root)
+
+%changelog
+* Sat Dec 24 2016 Christophe Delaere <christophe.delaere@gmail.com> - 1.0.0-1
+- Initial packaging.
