@@ -1,7 +1,7 @@
 # evermore
 A tool to export data from Evernote (more precisely NixNote) to a directory structure indexed with TMSU.
 
-Notes are converted to markdown and attachments are saved. Every file is indexed with the tags from the related note.
+Evermore creates one directory per notebook in the destination location. Notes are converted to markdown and attachments are saved in the same directory as the note. Every file is indexed with the tags from the related note. Among other things, evermore preserves the modification time of notes.
 
 ~~~~
 Usage: evermore.py [options] source.nnex destdir
